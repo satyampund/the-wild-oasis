@@ -1,5 +1,8 @@
+/* eslint-disable react/prop-types */
 import styled from "styled-components";
 import { formatCurrency }  from './../../utils/helpers'
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteCabin } from "../../services/apiCabins";
 
 const TableRow = styled.div`
   display: grid;
@@ -42,6 +45,19 @@ const Discount = styled.div`
 
 const CabinRow = ({cabin}) => {
 
+ const queryClient = useQueryClient()
+
+ const {isLoading: isDeleting, mutate} =  useMutation({
+    mutationFn: (id)=> deleteCabin(id),
+    onSuccess: ()=>{
+      alert("Cabin successfully deleted!")
+      queryClient.invalidateQueries({
+        queryKey: ['cabins']
+      })
+    },
+    onError: (err)=> alert(err.message)
+  })
+
   const {
     id: cabinId,
     name,
@@ -64,7 +80,7 @@ const CabinRow = ({cabin}) => {
         ) : (
           <span>&mdash;</span>
         )}
-       <button>Delete</button>
+       <button onClick={()=> mutate(cabinId)} disabled={isDeleting}>Delete</button>
       </TableRow>
     </>
   );

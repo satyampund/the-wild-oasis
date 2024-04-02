@@ -13,17 +13,26 @@ export async function getCabins(){
     return data;
 }
 
-export async function createCabin(newcabin){
-
+export async function createEditCabin(newcabin, id){
+  const hasImagePath = newcabin.image?.startsWith?.(import.meta.env.VITE_SUPABASE_URL);
+  
   const imageName = `${Math.random()}-${newcabin.image.name}`.replaceAll("/", "");
+  const imagePath =  hasImagePath ? newcabin.image : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/cabin-images/${imageName}`
 
-  const imagePath = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/cabin-images/${imageName}`
+  //1. create/edit a cabin
+  let query = supabase.from('cabins')
 
-  //1. create a cabin
-  const { data, error } = await supabase
-  .from('cabins')
-  .insert([{...newcabin, image: imagePath}])
-  .select()
+  //A. CREATE
+  if(!id){
+   query = query.insert([{...newcabin, image: imagePath}])
+  }
+
+  //B. EDIT
+  if(id){
+    query = query.update({ ...newcabin, image: imagePath }).eq("id", id);
+  }
+  
+  const {data, error} = await query.select().single();
 
   if (error) {
     console.error(error);
@@ -31,6 +40,7 @@ export async function createCabin(newcabin){
   }
 
   //2. upload the image
+  if (hasImagePath) return data;
   const { error: storageError } = await supabase.storage
     .from("cabin-images")
     .upload(imageName, newcabin.image);

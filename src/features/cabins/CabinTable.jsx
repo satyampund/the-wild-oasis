@@ -3,6 +3,7 @@ import CabinRow from './../cabins/CabinRow'
 import Spinner from './../../ui/Spinner'
 import { useCabins } from "./useCabins";
 import Table from "../../ui/Table";
+import Menus from "../../ui/Menus";
 
 const TableHeader = styled.header`
   display: grid;
@@ -25,6 +26,7 @@ function CabinTable(){
   if(isLoading) return <Spinner/>
   
   return (
+  <Menus>
     <Table columns='0.6fr 1.8fr 2.2fr 1fr 1fr 1fr'>
       <Table.Header>
         <div></div>
@@ -39,6 +41,7 @@ function CabinTable(){
          render={(cabin) => (<CabinRow cabin={cabin} key={cabin.id} />)}
       />
     </Table>
+  </Menus>
   );
 }
 
